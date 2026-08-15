@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title: "How Bias-Variance Trade-Off Works"
 date: 2026-01-01
 ---
