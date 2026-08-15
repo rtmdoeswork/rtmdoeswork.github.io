@@ -248,9 +248,7 @@ Finding the optimal balance in the bias-variance trade-off requires combining di
 ---
 # Footnotes
 
-[^1]: Example: 
-**Original Dataset** (N=5): 1, 2, 3, 4, 5
-**Bootstrapped Dataset** (N=5): 1, 1, 2, 4, 5
+[^1]: Example:  **Original Dataset** (N=5): 1, 2, 3, 4, 5 **Bootstrapped Dataset** (N=5): 1, 1, 2, 4, 5
 
 [^2]: Doesn't always have to be weaker or smaller.
 
