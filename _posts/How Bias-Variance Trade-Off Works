@@ -1,1 +1,258 @@
+# What is bias-variance trade-off?
 
+Simply put, the **bias-variance tradeoff** helps us find a good balance between **bias** and **variance** so that a model generalizes well to unseen data. But why do we care about bias and variance in the first place? *Bias represents systematic error caused by a model being too constrained or making overly strong assumptions*. *Variance represents how much a model’s predictions fluctuate when trained on different random samples from the same underlying data distribution*. Generally speaking, we want bias to be as low as possible, but reducing it too much can increase variance and make the model prone to overfitting. On the other hand, too much bias can make the model prone to underfitting.
+
+| Model Type     | Bias       | Variance   | Result                     |
+|----------------|------------|------------|----------------------------|
+| Underfitting   | High       | Low        | Poor training and test performance |
+| Optimal        | Moderate   | Moderate   | Best generalization        |
+| Overfitting    | Low        | High       | Poor test performance      |
+
+
+Bias is like pushing the model's guess off by a specific value and variance is by how much the prediction is off over multiple iterations. We want them both to be low, but usually lowering one increases the other and vice versa. The goal is to balance them.
+
+![bias-var visualized.png](/assets/images/bias-var visualized.png)
+
+We evaluate the model by using *Mean Squared Error (MSE)*. A large MSE indicates a poorly fit model on the training data, whereas a low MSE indicates a well-fitted model on the training data.
+
+The formula for MSE is:
+
+**Standard Form**
+
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
+
+Where:
+
+- $\text{MSE}$ is the Mean Squared Error (non-negative real number).
+- $n$ is the sample size.
+- $y_i$ is the $i$-th true target value.
+- $\hat{y}_i$ is the $i$-th predicted value.
+
+**Meaning Form**
+$$
+\text{Mean Squared Error} = \frac{1}{\text{Sample Size}} \sum_{i=1}^{\text{Sample Size}} \left(\text{True Value} - \text{Predicted Value}\right)^2
+$$
+
+When we evaluate a model on unseen test data, its expected prediction error (Expected Test MSE) mathematically decomposes into three fundamental components:
+
+**Standard Form**
+
+$$
+\operatorname{E}\left[(y - \hat{f}(x))^2\right] = \text{Bias}(\hat{f}(x))^2 + \operatorname{Var}(\hat{f}(x)) + \sigma^2
+$$
+
+Where:
+
+- $\operatorname{E}\left[(y - \hat{f}(x))^2\right]$ is the Expected Test Mean Squared Error.
+- $\text{Bias}(\hat{f}(x))^2$ is the squared bias (error from simplifying assumptions).
+- $\operatorname{Var}(\hat{f}(x))$ is the variance (sensitivity to training dataset fluctuations).
+- $\sigma^2$ is the irreducible error (inherent noise in the underlying target data).
+
+**Meaning Form**
+$$
+\text{Expected Test Error} = \left(\text{Systematic Error}\right)^2 + \text{Prediction Variance} + \text{Inherent Data Noise}
+$$
+
+## Practical methods to balance bias-variance trade-off
+
+The first thing that comes to mind is, of course, cross-validation. Cross-validation (CV) is our primary diagnostic tool for finding this balance. While CV itself doesn't alter model complexity, it gives us an unbiased estimate of test error so we can tune hyperparameters (like $\lambda$ in regularization) without overfitting to our training data.
+
+To actually control bias and variance, we rely on two main algorithmic strategies: **Regularization** and **Ensembling**.
+
+### Regularization Methods
+
+At its core, regularization is adding a penalty term to the loss function to prevent overfitting and improve generalization.
+
+![regularization visualization.png](/assets/images/regularization visualization.png)
+
+#### Quick Overview Table
+
+| Aspect              | L1 (lasso regression)                                                                    | L2 (ridge regression)                                                                                                             | Elastic Net Regression                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **When To Use**     | When there are multiple predictors and want to eliminate ones that don't add much value. | Multiple predictors but instead of eliminating some, you want to retain them but lower how much some predictors affect the model. | Use elastic net regression when dealing with highly correlated predictors.   |
+| **When To Not Use** | When all the predictors are important.                                                   | When there are predictors which don't affect or barely affect the final result.                                                   | When computing efficiency is critical and dataset has low multicollinearity. |
+| **Best At**         | Feature selection (driving irrelevant weights to zero).                                  | Shrinking weights of less important features without elimination.                                                                 | Enforcing sparsity while retaining grouped features.                         |
+
+How each of the regression's look:
+
+![L1,2 and elastic net visualization.png](/assets/images/L1,2 and elastic net visualization.png)
+
+---
+#### L1 (lasso regression)
+
+When there are many predictors and you want to select a smaller subset by driving some weights to zero.
+
+![Lasso Regression (L1) visualization.png](/assets/images/Lasso Regression (L1) visualization.png)
+
+**Standard Form**
+$$
+\lambda \sum_{j=1}^{d} |\theta_j|
+$$
+
+where:
+- $\theta_j$ is the weight coefficient assigned to the $j$-th feature.
+- $d$ is the total number of features.
+- $\lambda$ is the non-negative regularization hyperparameter controlling the strength of the L1 penalty.
+
+---
+
+**Meaning Form**
+$$
+L1 \text{ Regularization Penalty} = \lambda \sum_{j=1}^{d} |\theta_j|
+$$
+---
+#### L2 (ridge regression)
+
+Same thing as lasso regression but here we do **not** completely take the predictor out, instead we keep lowering them towards 0.
+
+![ridge regression visualization.png](/assets/images/ridge regression visualization.png)
+
+**Standard Form**
+$$
+\lambda \sum_{j=1}^{d} \theta_j^2
+$$
+
+where:
+- $\theta_j$ is the weight of the $j$-th feature.
+- $d$ is the number of features.
+- $\lambda$ controls the strength of the penalty.
+
+---
+
+**Meaning Form**
+$$
+\text{Regularization Multiplier} \times \sum_{\text{Feature Index}=1}^{\text{Total Number of Features}} \text{Squared Individual Feature Weight}
+$$
+
+---
+#### Elastic Net Regression
+
+Elastic Net offers a middle ground between L1 and L2. It combines L1’s ability to create sparse models with L2’s ability to handle correlated features smoothly.
+
+![elastic net visualization.png](/assets/images/elastic net visualization.png)
+
+**Standard Form**
+$$
+\lambda_1 \sum_{j=1}^{d} |\theta_j| + \lambda_2 \sum_{j=1}^{d} \theta_j^2
+$$
+
+where:
+- $\lambda_1$ is the hyperparameter controlling the strength of the L1 penalty.
+- $\lambda_2$ is the hyperparameter controlling the strength of the L2 penalty.
+
+**Meaning Form**
+$$
+\left( \text{L1 Regularization Multiplier} \times \sum_{\text{Feature Index}=1}^{\text{Total Number of Features}} \left| \text{Feature Weight} \right| \right) + \left( \text{L2 Regularization Multiplier} \times \sum_{\text{Feature Index}=1}^{\text{Total Number of Features}} \left( \text{Feature Weight} \right)^2 \right)
+$$
+## Ensemble Methods
+
+Ensemble models take a bunch of smaller and weaker models [^2] and merge them together to create a stronger model.
+
+![ensemble visualization.png](/assets/images/ensemble visualization.png)
+
+#### Quick Overview Table
+
+| Aspect              | Boosting                                                                                 | Bagging                                                                                              | Bootstrapping                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **When To Use**     | When a weak model is too inaccurate on its own and you want to build it up step by step. | When a model is too sensitive to the training data and you want more stable predictions.             | When you want to see how much your results would vary if you had different samples from the same dataset. |
+| **When To Not Use** | When the data is very noisy or you can't afford the extra cost of sequential training.   | When the model is mainly suffering from underfitting; averaging won't fix a model that's too simple. | When the dataset is too small or unrepresentative for resampling to tell you much.                        |
+| **Best At**         | Reducing bias and turning weak learners into a strong predictor.                         | Reducing variance and making unstable models more robust.                                            | Estimating uncertainty and sampling variability.                                                          |
+
+---
+#### Boosting
+
+Boosting works by sequentially training each weak learner, updating the overall ensemble model at each step.
+
+![boosting visualization.png](/assets/images/boosting visualization.png)
+
+**Standard Form** [^3]
+$$F(x)=\sum_{m=1}^{M}\alpha_m h_m(x)$$
+Where:
+
+- **$F(x)$**: ensemble score for input **$x$**.
+- **$M$**: total number of weak learners in the ensemble.
+- **$m$**: index of the current weak learner.
+- **$\alpha_m$**: weight assigned to learner **$m$**, determining how strongly its prediction contributes.
+- **$h_m(x)$**: prediction of weak learner **$m$** for input **$x$**.
+- **$x$**: input feature vector.
+
+**Meaning Form**
+
+$$\text{Final ensemble score} = \sum_{\text{each weak learner}} \left( \text{learner importance} \times \text{learner prediction} \right)$$
+
+
+---
+#### Bagging
+
+Bagging [^5] trains multiple models independently, usually on bootstrap samples, and combines their predictions to reduce variance.
+
+![bagging visualization.png](/assets/images/bagging visualization.png)
+
+**Standard Form**
+$$\hat{f}_{\text{bag}}(\mathbf{x}) = \frac{1}{B} \sum_{b=1}^{B} f_b(\mathbf{x})$$
+Where:
+
+* $\hat{f}_{\text{bag}}(\mathbf{x})$: The final aggregated ensemble prediction for input feature vector $\mathbf{x}$.
+* $B$: The total number of bootstrap base models in the ensemble ($B \in \mathbb{Z}^+$).
+* $b$: Index representing a specific base model ($b \in \{1, 2, \dots, B\}$).
+* $f_b(\mathbf{x})$: Prediction output from the $b$-th base model trained on the $b$-th bootstrap dataset.
+* $\mathbf{x}$: Input feature vector ($\mathbf{x} \in \mathbb{R}^d$).
+
+**Meaning Form**
+
+$$\text{Bagged Prediction} = \frac{1}{\text{Total Base Models}} \sum_{b=1}^{\text{Total Base Models}} \text{Base Model } b \text{ Prediction}$$
+
+
+
+---
+#### Bootstrapping
+
+Rather than combining predictions to train a model, bootstrapping is a underlying resampling technique. It generates multiple simulated datasets by repeatedly drawing observations from the original data at random with replacement [^1]. This allows us to estimate the sampling distribution and uncertainty of any statistic (like a model's weights or standard error) without making strong parametric assumptions. [^4]
+
+![bootstrap visualization.png](/assets/images/bootstrap visualization.png)
+
+**Standard Form**
+$$\operatorname{SE}_B(\hat{\theta}) = \sqrt{\frac{1}{B-1} \sum_{b=1}^{B} \left(\hat{\theta}^{*b} - \frac{1}{B}\sum_{r=1}^{B}\hat{\theta}^{*r}\right)^2}$$
+where:
+
+- $\operatorname{SE}_B(\hat{\theta})$ is the estimated bootstrap standard error of the target statistic.
+    
+- $B$ is the total number of bootstrap resamples generated during the simulation loop.
+    
+- $\hat{\theta}^{*b}$ is the specific value of the statistic calculated from the $b$-th bootstrap sample.
+    
+- $\hat{\theta}^{*r}$ is the specific value of the statistic calculated from the $r$-th bootstrap sample.
+
+**Meaning Form**
+
+$$\text{Bootstrap Standard Error} = \sqrt{\text{Sample Variance of the Collection of Bootstrap Statistics}}$$
+
+---
+## Key Takeaways
+
+Finding the optimal balance in the bias-variance trade-off requires combining diagnostic and algorithmic tools:
+
+1. **Cross-Validation** acts as your diagnostic, estimating test error to detect over- or under-fitting.
+2. **Regularization (L1, L2, Elastic Net)** controls complexity in single models by penalizing excessive weight magnitudes.
+3. **Ensemble Methods** combine multiple models—using **Bagging** to reduce variance or **Boosting** to reduce bias.
+4. **Bootstrapping** provides the statistical foundation for resampling data to train diverse ensemble models and estimate uncertainty.
+
+---
+# Footnotes
+
+[^1]: Example: 
+**Original Dataset** (N=5): 1, 2, 3, 4, 5
+**Bootstrapped Dataset** (N=5): 1, 1, 2, 4, 5
+
+[^2]: Doesn't always have to be weaker or smaller.
+
+[^3]: There is no single universal mathematical formulation of boosting; different boosting algorithms construct and update the ensemble differently. The equation above represents the general additive idea of combining learner contributions. In many boosting methods, the ensemble is built iteratively as:
+	$$
+	F_m(x) = F_{m-1}(x) + \alpha_m h_m(x)
+	$$
+
+[^4]: Bootstrapping is **not** an ensemble method itself, as it does not build or combine machine learning models. Instead, it is a statistical resampling technique that generates multiple datasets by drawing observations from the original data at random with replacement. Ensemble methods like Bagging rely on bootstrapping to generate diverse training sets, but bootstrapping on its own is used to measure sampling variability and estimate standard errors.
+
+[^5]: Also known as **Bootstrap Aggregating**.
