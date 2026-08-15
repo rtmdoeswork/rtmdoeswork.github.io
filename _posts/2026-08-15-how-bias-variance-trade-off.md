@@ -1,3 +1,9 @@
+---
+layout: post
+title: "How Bias-Variance Trade-Off Works"
+date: 2026-08-15
+---
+
 # What is bias-variance trade-off?
 
 Simply put, the **bias-variance tradeoff** helps us find a good balance between **bias** and **variance** so that a model generalizes well to unseen data. But why do we care about bias and variance in the first place? *Bias represents systematic error caused by a model being too constrained or making overly strong assumptions*. *Variance represents how much a model’s predictions fluctuate when trained on different random samples from the same underlying data distribution*. Generally speaking, we want bias to be as low as possible, but reducing it too much can increase variance and make the model prone to overfitting. On the other hand, too much bias can make the model prone to underfitting.
