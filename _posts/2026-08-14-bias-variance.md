@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "How Bias-Variance Trade-Off Works"
-date: 2026-01-01
+date: 2026-08-14
 ---
 
 # What is bias-variance trade-off?
